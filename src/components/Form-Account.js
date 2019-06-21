@@ -9,10 +9,21 @@ class AccountForm extends Component {
   };
 
   handleSubmit = e => {
+    let temp = [];
     e.preventDefault();
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         console.log("Received values of form: ", values);
+        temp.push({
+          acct_name: values.acct_name,
+          company: values.company_name,
+          first_name: values.first_name,
+          last_name: values.last_name,
+          acct_number: values.acct_number,
+          country: values.country
+          // curr: values.
+        });
+        this.props.setDataTable(temp);
       }
     });
   };
@@ -41,7 +52,6 @@ class AccountForm extends Component {
     const { curr_code, curr_symbol } = this.state;
     const { getFieldDecorator } = this.props.form;
     const { country, accountType } = this.props;
-    console.log(curr_code);
 
     return (
       <Form {...formItemLayout} onSubmit={this.handleSubmit}>
@@ -110,16 +120,6 @@ class AccountForm extends Component {
 
         <Form.Item label="Swift Code">
           {getFieldDecorator("swift_code", {
-            rules: [
-              {
-                required: true
-              }
-            ]
-          })(<Input />)}
-        </Form.Item>
-
-        <Form.Item label="Account Number">
-          {getFieldDecorator("acct_number", {
             rules: [
               {
                 required: true

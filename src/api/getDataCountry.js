@@ -68,7 +68,7 @@ export default function useGetDataCountry(initialAPI) {
 function reformData(country) {
   // console.log(country);
   let temp = country.map((item, index) => ({
-    value: index,
+    value: item.name,
     label: item.name,
     code: item.currencies[0].code,
     currencies_symbol: item.currencies[0].symbol
