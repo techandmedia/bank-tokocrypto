@@ -1,13 +1,13 @@
 import React, { Component } from "react";
-import { Form, Input, Cascader, Select, Button, Icon } from "antd";
-import {
-  formItemLayout,
-  tailFormItemLayout,
-  optionsCity,
-  optionsCountry
-} from "./utils";
+import { Form, Input, Cascader, Radio, Button } from "antd";
+import { formItemLayout, tailFormItemLayout, optionsCity } from "./utils";
 
 class AccountForm extends Component {
+  state = {
+    curr_code: "",
+    curr_symbol: ""
+  };
+
   handleSubmit = e => {
     e.preventDefault();
     this.props.form.validateFieldsAndScroll((err, values) => {
@@ -17,22 +17,31 @@ class AccountForm extends Component {
     });
   };
 
-  render() {
-    const { Option } = Select;
-    const { getFieldDecorator } = this.props.form;
-    const { country } = this.props;
-    console.log(country);
-    console.log(optionsCountry);
-    const prefixSelector = getFieldDecorator("prefix", {
-      initialValue: "86"
-    })(
-      <Select style={{ width: 70 }}>
-        <Option value="usd">
-          <Icon type="setting" />
-        </Option>
-        <Option value="idr">+87</Option>
-      </Select>
+  filter = (inputValue, path) => {
+    return path.some(
+      option =>
+        option.label.toLowerCase().indexOf(inputValue.toLowerCase()) > -1
     );
+  };
+
+  onCountryChange = c => {
+    let temp = this.props.country.filter(item => item.value === c[0]);
+    const [{ code, currencies_symbol }] = temp;
+    this.setState({
+      curr_code: code,
+      curr_symbol: currencies_symbol
+    });
+  };
+
+  onRadioChange = e => {
+    this.props.setAccountType(e.target.value);
+  };
+
+  render() {
+    const { curr_code, curr_symbol } = this.state;
+    const { getFieldDecorator } = this.props.form;
+    const { country, accountType } = this.props;
+    console.log(curr_code);
 
     return (
       <Form {...formItemLayout} onSubmit={this.handleSubmit}>
@@ -44,6 +53,49 @@ class AccountForm extends Component {
               }
             ]
           })(<Input />)}
+        </Form.Item>
+
+        {accountType === 1 ? (
+          <React.Fragment>
+            <Form.Item label="First Name">
+              {getFieldDecorator("first_name", {
+                rules: [
+                  {
+                    required: true
+                  }
+                ]
+              })(<Input />)}
+            </Form.Item>
+
+            <Form.Item label="Last Name">
+              {getFieldDecorator("last_name", {
+                rules: [
+                  {
+                    required: true
+                  }
+                ]
+              })(<Input />)}
+            </Form.Item>
+          </React.Fragment>
+        ) : (
+          accountType === 2 && (
+            <Form.Item label="Company Name">
+              {getFieldDecorator("company_name", {
+                rules: [
+                  {
+                    required: true
+                  }
+                ]
+              })(<Input />)}
+            </Form.Item>
+          )
+        )}
+
+        <Form.Item label="Account Type">
+          <Radio.Group onChange={this.onRadioChange} value={accountType}>
+            <Radio value={1}>Individual</Radio>
+            <Radio value={2}>Company</Radio>
+          </Radio.Group>
         </Form.Item>
 
         <Form.Item label="Account Number">
@@ -103,13 +155,34 @@ class AccountForm extends Component {
                 required: true
               }
             ]
-          })(<Cascader options={country} />)}
+          })(
+            <Cascader
+              options={country}
+              showSearch={this.filter}
+              onChange={this.onCountryChange}
+            />
+          )}
         </Form.Item>
 
         <Form.Item label="Currency">
           {getFieldDecorator("curr", {
-            rules: [{ required: true }]
-          })(<Input addonBefore={prefixSelector} style={{ width: "100%" }} />)}
+            // initialValue: curr_symbol,
+          })(
+            <React.Fragment>
+              {curr_code !== "" && (
+                <span
+                  style={{
+                    color: "white",
+                    background: "orange",
+                    padding: 10,
+                    width: "100%"
+                  }}
+                >
+                  {curr_code} / {curr_symbol}
+                </span>
+              )}
+            </React.Fragment>
+          )}
         </Form.Item>
 
         <Form.Item {...tailFormItemLayout}>
